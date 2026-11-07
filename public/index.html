@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PantryShare weekly plan</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>PantryShare weekly plan</h1>
+    <p>Plan for the week of <strong id="plan-date">-</strong>. Synthetic data only. Suggestions are yours to change.</p>
+  </header>
+  <main>
+    <div id="message" role="status" aria-live="polite"></div>
+    <section aria-labelledby="h-totals"><h2 id="h-totals">Totals</h2><div id="totals"></div></section>
+    <section aria-labelledby="h-measures"><h2 id="h-measures">Success measures</h2><div id="measures" class="measures"></div></section>
+    <section aria-labelledby="h-stock"><h2 id="h-stock">Stock flags</h2><div id="stock-flags"></div></section>
+    <section aria-labelledby="h-left"><h2 id="h-left">Left out of the plan</h2><div id="exclusions"></div></section>
+    <section aria-labelledby="h-items"><h2 id="h-items">Stock by item</h2><div id="items" class="scroll"></div></section>
+    <section aria-labelledby="h-partners"><h2 id="h-partners">Partners</h2>
+      <div class="filters">
+        <label>Find a partner <input type="search" id="filter-text" data-testid="filter-text"></label>
+        <label><input type="checkbox" id="filter-flagged" data-testid="filter-flagged"> Flagged only</label>
+      </div>
+      <div id="partners" class="scroll">Loading the plan...</div>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
