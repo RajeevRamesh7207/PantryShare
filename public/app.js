@@ -1,9 +1,68 @@
 import {
-  renderTotals, renderMeasures, renderPartners, renderItems, renderPlanFlags, renderExclusions,
+  renderTotals, renderMeasures, renderPartners, renderItems, renderPlanFlags, renderExclusions, tipIcon,
 } from './view-model.js';
 
 const state = { plan: null, expanded: new Set(), text: '', flaggedOnly: false };
 const $ = (id) => document.getElementById(id);
+
+// Tips on the fixed parts of the page.
+document.querySelectorAll('[data-tip-slot]').forEach((el) => { el.innerHTML = tipIcon(el.dataset.tipSlot, el.dataset.tipLabel); });
+
+// Tooltips: one floating box, shown on hover, keyboard focus or tap, hidden on Escape, scroll or when the page redraws.
+const tooltip = document.createElement('div');
+tooltip.id = 'tooltip';
+tooltip.setAttribute('role', 'tooltip');
+tooltip.hidden = true;
+document.body.append(tooltip);
+let tipOwner = null;
+
+function hideTip() {
+  tooltip.hidden = true;
+  tipOwner?.removeAttribute('aria-describedby');
+  tipOwner = null;
+}
+
+function placeTip(el) {
+  const r = el.getBoundingClientRect();
+  const w = tooltip.offsetWidth;
+  const h = tooltip.offsetHeight;
+  const left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+  const below = r.bottom + 6 + h <= window.innerHeight || r.top - 6 - h < 0;
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${below ? r.bottom + 6 : r.top - 6 - h}px`;
+}
+
+function showTip(el) {
+  if (tipOwner === el) return;
+  hideTip();
+  tooltip.textContent = el.dataset.tipText;
+  tooltip.hidden = false;
+  placeTip(el);
+  el.setAttribute('aria-describedby', 'tooltip');
+  tipOwner = el;
+}
+
+// Scrolling moves the trigger, so the tip follows it (and closes once the trigger is off screen).
+function followTip() {
+  if (!tipOwner) return;
+  const r = tipOwner.getBoundingClientRect();
+  if (r.bottom < 0 || r.top > window.innerHeight) hideTip(); else placeTip(tipOwner);
+}
+
+const tipTarget = (event) => event.target.closest?.('[data-tip-text]') ?? null;
+document.addEventListener('mouseover', (event) => { const el = tipTarget(event); if (el) showTip(el); });
+document.addEventListener('mouseout', (event) => { if (tipTarget(event)) hideTip(); });
+document.addEventListener('focusin', (event) => { const el = tipTarget(event); if (el) showTip(el); });
+document.addEventListener('focusout', (event) => { if (tipTarget(event)) hideTip(); });
+document.addEventListener('keydown', (event) => { if (event.key === 'Escape') hideTip(); });
+document.addEventListener('scroll', followTip, true);
+window.addEventListener('resize', hideTip);
+// A tap on a phone has no hover, so a click on a tip button toggles it.
+document.addEventListener('click', (event) => {
+  const el = tipTarget(event);
+  if (!el) { hideTip(); return; }
+  showTip(el);
+});
 
 function showMessage(text, isError = false) {
   const el = $('message');
@@ -28,6 +87,7 @@ function renderPartnerTable() {
 }
 
 function render() {
+  hideTip();
   const plan = state.plan;
   $('plan-date').textContent = plan.planDate;
   $('totals').innerHTML = renderTotals(plan);
