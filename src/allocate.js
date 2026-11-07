@@ -241,6 +241,18 @@ export function buildPlan(snapshot) {
   }
   flags.push(...expiryFlags(lotsForExpiry, FLAG_MIN_KG));
 
+  // Over stock: put the warning on the lines the coordinator changed, not only in the stock flags.
+  const overStockKg = new Map(itemsOut.filter((i) => i.unallocatedKg < -FLAG_MIN_KG).map((i) => [i.item, -i.unallocatedKg]));
+  if (overStockKg.size > 0) {
+    for (const p of partnersOut) {
+      for (const l of p.lines) {
+        if (l.adjustedKg !== null && overStockKg.has(l.item)) {
+          l.warnings.push({ type: 'over-allocated', message: `${l.item} is ${r1(overStockKg.get(l.item))} kg above the stock on hand` });
+        }
+      }
+    }
+  }
+
   for (const l of snapshot.expiredLots) {
     flags.push({ type: 'expired', severity: 'warn', scope: 'item', item: l.item, lotId: l.lotId, kg: l.kg, expiry: l.expiry, message: `${r1(l.kg)} kg of ${l.item} (lot ${l.lotId}) expired ${l.expiry}, before the plan date, and is not stock on hand` });
   }

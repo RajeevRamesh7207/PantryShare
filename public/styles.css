@@ -47,4 +47,30 @@ input, select { padding: 3px 6px; border: 1px solid var(--line); border-radius: 
 .flags, .exclusions { margin: 0; padding-left: 18px; }
 .flags li, .exclusions li { margin: 4px 0; }
 .fix { display: inline-flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-@media (max-width: 600px) { th, td { padding: 6px 4px; } }
+.muted { color: var(--muted); font-weight: 400; }
+.stat.over dd { color: var(--bad); }
+.filter { display: inline-flex; gap: 4px; align-items: center; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Tooltips: the "i" button, badges that carry a tip, and the floating box app.js shows. */
+button.tip { width: 1.25em; height: 1.25em; padding: 0; margin-left: 2px; border-radius: 50%; font-size: 0.75rem; line-height: 1; font-weight: 700; color: var(--muted); vertical-align: middle; }
+button.tip:hover, button.tip:focus-visible { color: var(--accent); }
+.badge.has-tip { cursor: help; }
+.badge.has-tip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#tooltip { position: fixed; z-index: 50; max-width: min(280px, calc(100vw - 16px)); padding: 6px 10px; border-radius: 6px; font-size: 0.82rem; font-weight: 400; line-height: 1.35;
+  background: var(--fg); color: var(--bg); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); pointer-events: none; }
+#tooltip[hidden] { display: none; }
+
+@media (max-width: 600px) {
+  th, td { padding: 6px 4px; }
+  /* On a phone each partner becomes a card, so no column is cut off. */
+  table.partners thead { display: none; }
+  table.partners, table.partners tbody { display: block; }
+  table.partners tr.partner { display: block; margin: 8px 0 0; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; }
+  table.partners tr.partner td { display: flex; justify-content: space-between; gap: 12px; border-bottom: 0; padding: 2px 0; }
+  table.partners tr.partner td:first-child { font-weight: 600; }
+  table.partners tr.partner td[data-label]::before { content: attr(data-label); color: var(--muted); font-weight: 400; }
+  table.partners tr.partner td:empty { display: none; }
+  table.partners tr.lines { display: block; }
+  table.partners tr.lines > td { display: block; padding: 4px 0 0; overflow-x: auto; }
+}

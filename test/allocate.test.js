@@ -87,3 +87,18 @@ test('FR1.2 with FR2: mixed units combine into one stock that is fully allocated
   near(plan.items[0].stockKg, 200);
   near(plan.items[0].allocatedKg, 200);
 });
+
+test('over stock: the line the coordinator changed gets a warning, and lines they did not touch do not', () => {
+  const data = makeData({
+    partners: [partner('A', 100), partner('B', 100)],
+    inventory: [record('R1', 'rice', 'dry', 100, '2027-06-01')],
+  });
+  const calm = planFor(data);
+  assert.deepEqual(line(calm, 'A', 'rice').warnings, [], 'no warning while within stock');
+  const plan = planFor(data, (repo) => repo.setAdjustment('A', 'rice', 500));
+  const warn = line(plan, 'A', 'rice').warnings.find((w) => w.type === 'over-allocated');
+  assert.ok(warn, 'edited line is warned');
+  assert.match(warn.message, /rice is 450 kg above the stock on hand/);
+  assert.deepEqual(line(plan, 'B', 'rice').warnings, [], 'the other partner is not warned');
+  assert.ok(plan.flags.some((f) => f.type === 'over-allocated'), 'the stock flag is still there');
+});
